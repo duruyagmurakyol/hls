@@ -1,0 +1,4 @@
+{
+  "what problem occurred?": "Validation failed. Inspect the reported compiler or testbench diagnostic for the failing operation.",
+  "how should it be fixed?": "Correct the selected testcase implementation, then run the orchestrator again."
+}
