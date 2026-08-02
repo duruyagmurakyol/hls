@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
-
+from tempfile import TemporaryDirectory
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -138,12 +138,22 @@ def compile_testcase(
     and testbench settings are supplied by the benchmark's configuration file.
     """
     benchmark = _load_benchmark(benchmark_name)
-    load_testcase(benchmark_name, testcase_number)
-    config_path = benchmark / "task.cfg"
-    if not config_path.is_file():
+    testcase = load_testcase(benchmark_name, testcase_number)
+    template_path = benchmark / "task.cfg"
+    if not template_path.is_file():
         raise FileNotFoundError(
-            f"benchmark '{benchmark_name}' has no Vitis configuration at {config_path}"
+            f"benchmark '{benchmark_name}' has no Vitis configuration at {template_path}"
         )
+
+    config = template_path.read_text(encoding="utf-8")
+    config = config.replace("{TEST_CASE_FILE}", str(testcase.resolve()))
+    config = config.replace("{TEST_CASE_FUNCTION}", benchmark_name)
+    config = config.replace("{TEST_BENCH_FILE}", str(Path(f"{benchmark_name}_test.cpp").resolve()))
+
+    with TemporaryDirectory(prefix="vitis_hls_") as temp_dir:
+        config_path = Path(temp_dir) / "task.cfg"
+        config_path.write_text(config, encoding="utf-8")
+
 
     compilation = subprocess.run(
         [
