@@ -1,6 +1,0 @@
-{
-  "top_function": "kernel_top",
-  "clock_ns": 5.0,
-  "vitis_executable": "vitis_hls",
-  "repair_manifest": "repair.json"
-}

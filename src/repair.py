@@ -3,11 +3,11 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from testcase_runner import TestcaseResult
+from testcase_runner import ProcessResult
 
 
 
 
-def run_repair(testcase: Path, result: TestcaseResult) -> bool:
+def run_repair(testcase: Path, result: ProcessResult) -> bool:
     """"""
     return False

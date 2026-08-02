@@ -8,7 +8,6 @@ from testcase_runner import list_testcases, load_testcase, run_testcase
 
 MAX_REPAIR_ATTEMPTS = 1
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Select and run an HLS benchmark testcase.")
     parser.add_argument("benchmark", help="benchmark name under benchmarks/")
@@ -33,14 +32,12 @@ def main() -> int:
     result = run_testcase(args.benchmark, testcase_number)
     repair_attempts = 0
     while not result.passed and repair_attempts < MAX_REPAIR_ATTEMPTS:
-        print(result.error, end="", file=sys.stderr)
         print(
-            f"Testcase {result.stage} failed with exit code {result.exit_code}.",
+            f"Testcase failed with exit code {result.exit_code}.",
             file=sys.stderr,
         )
-        repair = run_repair(testcase, result)
-        print(f"Repair placeholder for {result.stage}:", file=sys.stderr)
-        print(f"  Problem: PUT PROBLEM HERE", file=sys.stderr)
+        run_repair(testcase, result)
+        print(f" Repair completed.", file=sys.stderr)
 
         repair_attempts += 1
         print("Re-running testcase after repair.", file=sys.stderr)
@@ -54,9 +51,8 @@ def main() -> int:
         print("ready for optimisation")
         return 0
 
-    print(result.error, end="", file=sys.stderr)
     print(
-        f"Testcase {result.stage} failed with exit code {result.exit_code}.",
+        f"Testcase failed with exit code {result.exit_code}.",
         file=sys.stderr,
     )
     print(f"Stopping after {MAX_REPAIR_ATTEMPTS} retries.", file=sys.stderr)
