@@ -8,3 +8,7 @@ dist/
 runs/
 **/.DS_Store
 **/.vscode
+reports/
+logs/
+hls/
+hls.*

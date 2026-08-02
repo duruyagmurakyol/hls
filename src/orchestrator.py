@@ -6,7 +6,7 @@ import sys
 from repair import run_repair
 from testcase_runner import list_testcases, load_testcase, run_testcase
 
-MAX_REPAIR_ATTEMPTS = 3
+MAX_REPAIR_ATTEMPTS = 1
 
 
 def parse_args() -> argparse.Namespace:

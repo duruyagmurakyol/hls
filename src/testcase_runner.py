@@ -148,27 +148,27 @@ def compile_testcase(
     config = template_path.read_text(encoding="utf-8")
     config = config.replace("{TEST_CASE_FILE}", str(testcase.resolve()))
     config = config.replace("{TEST_CASE_FUNCTION}", benchmark_name)
-    config = config.replace("{TEST_BENCH_FILE}", str(Path(f"{benchmark_name}_test.cpp").resolve()))
+    config = config.replace("{TEST_BENCH_FILE}", str(benchmark.resolve() / f"{benchmark_name}_test.cpp"))
 
     with TemporaryDirectory(prefix="vitis_hls_") as temp_dir:
         config_path = Path(temp_dir) / "task.cfg"
         config_path.write_text(config, encoding="utf-8")
 
 
-    compilation = subprocess.run(
-        [
-            "vitis-run",
-            "--mode",
-            "hls",
-            "--csim",
-            "--config",
-            str(config_path),
-            "--work_dir",
-            str(working_directory),
-        ],
-        capture_output=True,
-        text=True,
-    )
+        compilation = subprocess.run(
+            [
+                "vitis-run",
+                "--mode",
+                "hls",
+                "--csim",
+                "--config",
+                str(config_path),
+                "--work_dir",
+                str(working_directory),
+            ],
+            capture_output=True,
+            text=True,
+        )
     return CompilationResult(
         exit_code=compilation.returncode,
         stdout=compilation.stdout,
