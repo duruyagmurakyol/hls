@@ -3,7 +3,9 @@
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
-import tempfile
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 @dataclass(frozen=True)
@@ -97,7 +99,7 @@ def _load_benchmark(benchmark_name: str) -> Path:
     if not benchmark_name or Path(benchmark_name).name != benchmark_name:
         raise ValueError("benchmark name must be a single directory name")
 
-    benchmarks_root = Path(__file__).resolve().parent.parent / "benchmarks"
+    benchmarks_root = PROJECT_ROOT / "benchmarks"
     testcase = benchmarks_root / benchmark_name
     if not testcase.is_dir():
         raise FileNotFoundError(f"benchmark '{benchmark_name}' was not found at {testcase}")
@@ -167,9 +169,8 @@ def compile_testcase(
 
 
 def run_testcase(benchmark_name: str, testcase_number: int) -> TestcaseResult:
-    """Run a selected testcase in a temporary Vitis HLS working directory."""
-    with tempfile.TemporaryDirectory(prefix=f"hls-{benchmark_name}-") as build_dir:
-        compilation = compile_testcase(
-            benchmark_name, testcase_number, Path(build_dir)
-        )
-        return TestcaseResult(compilation=compilation, execution=None)
+    """Run a selected testcase with the Python project root as Vitis's work directory."""
+    compilation = compile_testcase(
+        benchmark_name, testcase_number, PROJECT_ROOT
+    )
+    return TestcaseResult(compilation=compilation, execution=None)
