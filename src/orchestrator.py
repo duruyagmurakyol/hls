@@ -4,7 +4,7 @@ import argparse
 import sys
 
 from repair import run_repair
-from testcase_runner import ProcessResult, list_testcases, load_testcase, run_testcase
+from testcase_runner import list_testcases, load_testcase, run_testcase
 
 MAX_REPAIR_ATTEMPTS = 1
 
@@ -29,19 +29,19 @@ def main() -> int:
     except (ValueError, FileNotFoundError) as error:
         raise SystemExit(f"error: {error}") from error
 
-    result = ProcessResult( exit_code=1,stdout="",stderr="") #run_testcase(args.benchmark, testcase_number)
+    result = run_testcase(args.benchmark, testcase_number)
     repair_attempts = 0
     while not result.passed and repair_attempts < MAX_REPAIR_ATTEMPTS:
         print(
             f"Testcase failed with exit code {result.exit_code}.",
             file=sys.stderr,
         )
-        run_repair(testcase, result)
+        repaired_testcase = run_repair(testcase, result)
         print(f" Repair completed.", file=sys.stderr)
 
         repair_attempts += 1
         print("Re-running testcase after repair.", file=sys.stderr)
-        result = run_testcase(args.benchmark, testcase_number)
+        result = run_testcase(args.benchmark, testcase_number, repaired_testcase)
 
     if result.passed:
         if result.stdout:

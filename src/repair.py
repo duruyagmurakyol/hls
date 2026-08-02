@@ -32,7 +32,7 @@ def concise_evidence(output: str, limit: int = 1200) -> str:
     return text[-limit:]
 
 
-def run_repair(testcase: Path, result: ProcessResult) -> bool:
+def run_repair(testcase: Path, result: ProcessResult) -> Path:
     """"""
     system = (
         "You are an AMD/Xilinx HLS C++ repair engine. "
@@ -92,4 +92,4 @@ def run_repair(testcase: Path, result: ProcessResult) -> bool:
             f'"../{header.name}"', f'"{header.name}"'
         )
     repaired_source.write_text(repaired_content, encoding="utf-8")
-    return True
+    return repaired_source

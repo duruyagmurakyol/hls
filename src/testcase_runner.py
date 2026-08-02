@@ -65,7 +65,7 @@ def load_testcase(benchmark_name: str, testcase_number: int) -> Path:
 
 
 def compile_testcase(
-    benchmark_name: str, testcase_number: int
+    benchmark_name: str, testcase_number: int, testcase_file: Path | None = None
 ) -> ProcessResult:
     """Run C simulation for a selected testcase through Vitis HLS.
 
@@ -75,7 +75,10 @@ def compile_testcase(
     and testbench settings are supplied by the benchmark's configuration file.
     """
     benchmark = _load_benchmark(benchmark_name)
-    testcase = load_testcase(benchmark_name, testcase_number)
+    selected_testcase = load_testcase(benchmark_name, testcase_number)
+    testcase = (testcase_file or selected_testcase).resolve()
+    if not testcase.is_file():
+        raise FileNotFoundError(f"testcase file was not found at {testcase}")
     template_path = benchmark / "task.cfg"
     if not template_path.is_file():
         raise FileNotFoundError(
@@ -113,6 +116,8 @@ def compile_testcase(
     )
 
 
-def run_testcase(benchmark_name: str, testcase_number: int) -> ProcessResult:
-    """Run a selected testcase with the Python project root as Vitis's work directory."""
-    return compile_testcase(benchmark_name, testcase_number)
+def run_testcase(
+    benchmark_name: str, testcase_number: int, testcase_file: Path | None = None
+) -> ProcessResult:
+    """Run a testcase, optionally substituting a repaired source file."""
+    return compile_testcase(benchmark_name, testcase_number, testcase_file)
