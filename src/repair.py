@@ -1,4 +1,6 @@
 from pathlib import Path
+from uuid import uuid4
+
 from testcase_runner import ProcessResult
 from siliconflow import complete
 
@@ -33,10 +35,15 @@ def concise_evidence(output: str, limit: int = 1200) -> str:
 def run_repair(testcase: Path, result: ProcessResult) -> bool:
     """"""
     system = (
-            "You repair AMD/Xilinx HLS C++ code. Return only the complete repaired contents "
-            "of the editable source file. Do not use Markdown fences, explanations, JSON, or patches. "
-            "Preserve the declared top-function interface and make the smallest necessary repair."
-        )
+        "You are an AMD/Xilinx HLS C++ repair engine. "
+        "Your entire response must contain only the complete, repaired contents of the editable source file. "
+        "Output raw C++ source code only. "
+        "Never include Markdown fences, explanations, commentary, headings, JSON, diffs, patches, or surrounding text. "
+        "Do not describe the repair. "
+        "Do not modify the declared top-function name, signature, parameter types, or interface pragmas. "
+        "Preserve all correct existing behaviour and make only the smallest changes required to fix the defect. "
+        "The first character of your response must be part of the C++ source file, and the final character must be the end of that source file."
+    )
 
     testcase = testcase.resolve()
     source = testcase.read_text(encoding="utf-8")
@@ -72,5 +79,17 @@ def run_repair(testcase: Path, result: ProcessResult) -> bool:
         )
     
     
-    print(f"Model response:\n{response}")
-    return False
+    run_id = uuid4().hex
+    repaired_source = Path(__file__).resolve().parent.parent / "runs" / run_id / testcase.name
+    repaired_source.parent.mkdir(parents=True, exist_ok=True)
+    header = benchmark / f"{benchmark.name}.h"
+    repaired_content = response.content
+    if header.is_file():
+        (repaired_source.parent / header.name).write_text(
+            header.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+        repaired_content = repaired_content.replace(
+            f'"../{header.name}"', f'"{header.name}"'
+        )
+    repaired_source.write_text(repaired_content, encoding="utf-8")
+    return True

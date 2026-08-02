@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import socket
 import time
 import urllib.error
@@ -68,38 +67,6 @@ def list_models(
         raise RuntimeError(f"SiliconFlow returned an invalid models response: {payload}")
     return [model for model in models if isinstance(model, dict)]
 
-# not yet used
-def extract_source_response(content: str) -> str:
-    """Extract C/C++ source from a SiliconFlow model response.
-
-    Repair models may prepend a filename or wrap source in Markdown despite
-    instructions not to. Prefer the first C/C++ fence, remove a standalone
-    source-file label when present, and reject any remaining fences.
-    """
-
-    text = content.strip()
-    fenced = re.search(
-        r"```(?:(?:cpp|c\+\+|cc|cxx|c)[ \t]*\r?\n|\r?\n)(.*?)\r?\n?```",
-        text,
-        re.DOTALL | re.IGNORECASE,
-    )
-    if fenced:
-        text = fenced.group(1).strip()
-    else:
-        lines = text.splitlines()
-        if lines and re.fullmatch(
-            r"(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.(?:c|cc|cpp|cxx|h|hpp)",
-            lines[0].strip(),
-        ):
-            text = "\n".join(lines[1:]).strip()
-
-    if "```" in text:
-        raise ValueError("Model response still contains Markdown fences after parsing")
-    if not text:
-        raise ValueError("Model response did not contain source code")
-    return text + "\n"
-
-# not yet used
 def complete(
     *,
     model: str,
